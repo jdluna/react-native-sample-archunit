@@ -1,0 +1,402 @@
+name: CI & Deploy
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [18.x, 20.x]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run unit tests
+        run: npm test -- --coverage
+
+      - name: Run architecture checks
+        run: npm run arch:check
+
+      - name: Generate architecture report
+        if: always()
+        run: npm run arch:report
+
+      - name: Upload coverage reports
+        uses: codecov/codecov-action@v3
+        with:
+          files: ./coverage/coverage-final.json
+          flags: unittests
+          name: codecov-umbrella
+        continue-on-error: true
+
+      - name: Upload architecture report
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: arch-report-${{ matrix.node-version }}
+          path: arch-report.json
+
+  deploy:
+    needs: test
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run architecture checks
+        run: npm run arch:check
+
+      - name: Generate architecture report
+        run: npm run arch:report
+
+      - name: Create documentation site
+        run: |
+          mkdir -p public
+          cat > public/index.html << 'EOF'
+          <!DOCTYPE html>
+          <html lang="en">
+          <head>
+              <meta charset="UTF-8">
+              <meta name="viewport" content="width=device-width, initial-scale=1.0">
+              <title>Analytics Module - Architecture & Test Results</title>
+              <style>
+                  * {
+                      margin: 0;
+                      padding: 0;
+                      box-sizing: border-box;
+                  }
+                  
+                  body {
+                      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+                      line-height: 1.6;
+                      color: #333;
+                      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                      min-height: 100vh;
+                      padding: 20px;
+                  }
+                  
+                  .container {
+                      max-width: 1200px;
+                      margin: 0 auto;
+                      background: white;
+                      border-radius: 12px;
+                      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+                      overflow: hidden;
+                  }
+                  
+                  header {
+                      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                      color: white;
+                      padding: 40px 20px;
+                      text-align: center;
+                  }
+                  
+                  header h1 {
+                      font-size: 2.5em;
+                      margin-bottom: 10px;
+                  }
+                  
+                  header p {
+                      font-size: 1.1em;
+                      opacity: 0.95;
+                  }
+                  
+                  main {
+                      padding: 40px 20px;
+                  }
+                  
+                  section {
+                      margin-bottom: 40px;
+                  }
+                  
+                  section h2 {
+                      font-size: 1.8em;
+                      color: #667eea;
+                      margin-bottom: 20px;
+                      border-bottom: 3px solid #667eea;
+                      padding-bottom: 10px;
+                  }
+                  
+                  .status-badge {
+                      display: inline-block;
+                      padding: 10px 20px;
+                      border-radius: 6px;
+                      font-weight: bold;
+                      margin: 10px 10px 10px 0;
+                  }
+                  
+                  .status-success {
+                      background: #10b981;
+                      color: white;
+                  }
+                  
+                  .status-info {
+                      background: #3b82f6;
+                      color: white;
+                  }
+                  
+                  .architecture-diagram {
+                      background: #f3f4f6;
+                      padding: 20px;
+                      border-radius: 8px;
+                      overflow-x: auto;
+                      margin: 20px 0;
+                  }
+                  
+                  .architecture-diagram pre {
+                      font-family: 'Courier New', monospace;
+                      font-size: 0.9em;
+                      color: #374151;
+                  }
+                  
+                  table {
+                      width: 100%;
+                      border-collapse: collapse;
+                      margin: 20px 0;
+                  }
+                  
+                  table th {
+                      background: #f3f4f6;
+                      padding: 12px;
+                      text-align: left;
+                      font-weight: 600;
+                      border-bottom: 2px solid #e5e7eb;
+                  }
+                  
+                  table td {
+                      padding: 12px;
+                      border-bottom: 1px solid #e5e7eb;
+                  }
+                  
+                  table tr:hover {
+                      background: #fafafa;
+                  }
+                  
+                  .rules-grid {
+                      display: grid;
+                      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+                      gap: 20px;
+                      margin: 20px 0;
+                  }
+                  
+                  .rule-card {
+                      border: 2px solid #e5e7eb;
+                      border-radius: 8px;
+                      padding: 20px;
+                      background: #fafafa;
+                      transition: all 0.3s ease;
+                  }
+                  
+                  .rule-card:hover {
+                      border-color: #667eea;
+                      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.1);
+                  }
+                  
+                  .rule-card h4 {
+                      color: #667eea;
+                      margin-bottom: 10px;
+                  }
+                  
+                  footer {
+                      background: #f3f4f6;
+                      padding: 20px;
+                      text-align: center;
+                      color: #666;
+                      border-top: 1px solid #e5e7eb;
+                  }
+                  
+                  .cta-button {
+                      display: inline-block;
+                      margin-top: 20px;
+                      padding: 12px 30px;
+                      background: #667eea;
+                      color: white;
+                      text-decoration: none;
+                      border-radius: 6px;
+                      font-weight: 600;
+                      transition: background 0.3s ease;
+                  }
+                  
+                  .cta-button:hover {
+                      background: #764ba2;
+                  }
+              </style>
+          </head>
+          <body>
+              <div class="container">
+                  <header>
+                      <h1>📊 Analytics Module</h1>
+                      <p>React Native Library with Enforced Layer Architecture</p>
+                  </header>
+                  
+                  <main>
+                      <section>
+                          <h2>✅ Build Status</h2>
+                          <div>
+                              <span class="status-badge status-success">Architecture Tests: PASSING</span>
+                              <span class="status-badge status-success">Unit Tests: PASSING</span>
+                              <span class="status-badge status-info">Last Updated: <script>document.write(new Date().toLocaleString())</script></span>
+                          </div>
+                      </section>
+                      
+                      <section>
+                          <h2>🏗️ Architecture Overview</h2>
+                          <p>A four-layer architecture enforced by ArchUnit with a centralized DI container:</p>
+                          <div class="architecture-diagram">
+                              <pre>┌─────────────────────────────────────────────────────────────┐
+│                         Module                              │
+│                                                             │
+│  ┌──────────────────┐   ┌─────────────────────────────┐    │
+│  │  Contracts layer │◄──│     Presentation layer      │    │
+│  │                  │   │  ViewModels · RN Screens     │    │
+│  │  ITelemetry-     │   └─────────────────────────────┘    │
+│  │  Contract        │                                       │
+│  │  IAnalyticsSDK-  │   ┌─────────────────────────────┐    │
+│  │  Contract        │◄──│       Domain layer           │    │
+│  │                  │   │  Use Cases · Repo interfaces │    │
+│  └──────────────────┘   └─────────────────────────────┘    │
+│                                                             │
+│                         ┌─────────────────────────────┐    │
+│                    ◄────│        Data layer            │    │
+│                         │  Repositories · DataSources  │    │
+│                         └─────────────────────────────┘    │
+│                                                             │
+│  ┌─────────────────────────────────────────────────────┐   │
+│  │                  DI Container                        │   │
+│  │         Binds interfaces to implementations          │   │
+│  └─────────────────────────────────────────────────────┘   │
+└─────────────────────────────────────────────────────────────┘
+  Layers consume contracts → DI / Service Locator injects impls</pre>
+                          </div>
+                      </section>
+                      
+                      <section>
+                          <h2>📋 Architecture Rules (8 total)</h2>
+                          <div class="rules-grid">
+                              <div class="rule-card">
+                                  <h4>Rule 1: Contracts Self-Contained</h4>
+                                  <p>Contracts layer imports nothing from other layers—no circular dependencies, no leakage.</p>
+                              </div>
+                              <div class="rule-card">
+                                  <h4>Rule 2: Domain Isolation</h4>
+                                  <p>Domain layer only depends on contracts; no data, presentation, or react-native imports.</p>
+                              </div>
+                              <div class="rule-card">
+                                  <h4>Rule 3: Data Layer Scope</h4>
+                                  <p>Data layer only depends on domain + contracts; no presentation or react-native imports.</p>
+                              </div>
+                              <div class="rule-card">
+                                  <h4>Rule 4: Presentation Dependencies</h4>
+                                  <p>Presentation layer only depends on domain interfaces + contracts, not concrete implementations.</p>
+                              </div>
+                              <div class="rule-card">
+                                  <h4>Rule 5: DI as Composition Root</h4>
+                                  <p>Only the DI container may import concrete repository and datasource implementations.</p>
+                              </div>
+                              <div class="rule-card">
+                                  <h4>Rule 6: Naming Conventions</h4>
+                                  <p>Enforced prefixes/suffixes: <code>I*Contract</code>, <code>*UseCase</code>, <code>*Impl</code>, <code>*ViewModel</code>, <code>*Screen</code>.</p>
+                              </div>
+                              <div class="rule-card">
+                                  <h4>Rule 7: No Circular Dependencies</h4>
+                                  <p>All layers are checked for cycles—design dependency graphs must be acyclic.</p>
+                              </div>
+                              <div class="rule-card">
+                                  <h4>Rule 8: React Native Isolation</h4>
+                                  <p>React Native imports restricted to the presentation layer; domain and data remain framework-agnostic.</p>
+                              </div>
+                          </div>
+                      </section>
+                      
+                      <section>
+                          <h2>🚀 Running Tests Locally</h2>
+                          <pre style="background: #f3f4f6; padding: 15px; border-radius: 8px; overflow-x: auto; color: #374151;"><code># Install dependencies
+npm install
+
+# Run all tests
+npm test
+
+# Run only architecture rules
+npm run arch:check
+
+# Generate JSON architecture report
+npm run arch:report</code></pre>
+                      </section>
+                      
+                      <section>
+                          <h2>📚 Learn More</h2>
+                          <p>This project uses <strong>ArchUnit</strong> for architecture testing:</p>
+                          <table>
+                              <tr>
+                                  <th>Link</th>
+                                  <th>Description</th>
+                              </tr>
+                              <tr>
+                                  <td><a href="https://www.npmjs.com/package/archunit" target="_blank">archunit on npm</a></td>
+                                  <td>Official npm package (ArchUnitTS)</td>
+                              </tr>
+                              <tr>
+                                  <td><a href="https://github.com/LukasNiessen/ArchUnitTS" target="_blank">ArchUnitTS GitHub</a></td>
+                                  <td>Source code & documentation</td>
+                              </tr>
+                              <tr>
+                                  <td><a href="https://clean-architecture.dev/" target="_blank">Clean Architecture</a></td>
+                                  <td>Reference architecture principles</td>
+                              </tr>
+                          </table>
+                          <a href="https://github.com" class="cta-button">View on GitHub</a>
+                      </section>
+                  </main>
+                  
+                  <footer>
+                      <p>Generated by GitHub Actions CI/CD Pipeline</p>
+                      <p style="font-size: 0.9em; margin-top: 10px;">Commit: <code><script>fetch('https://api.github.com/repos/' + location.pathname.split('/').slice(1, 3).join('/') + '/commits?per_page=1')
+                          .then(r => r.json())
+                          .then(d => document.write(d[0]?.sha?.substring(0, 7) || 'N/A'))
+                          .catch(() => {})</script></code></p>
+                  </footer>
+              </div>
+          </body>
+          </html>
+          EOF
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v3
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v2
+        with:
+          path: 'public'
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v2
