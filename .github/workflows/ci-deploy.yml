@@ -28,12 +28,8 @@ jobs:
       - name: Run unit tests
         run: npm test -- --coverage
 
-      - name: Run architecture checks
+      - name: Run folder structure validation
         run: npm run arch:check
-
-      - name: Generate architecture report
-        if: always()
-        run: npm run arch:report
 
       - name: Upload coverage reports
         uses: codecov/codecov-action@v3
@@ -42,13 +38,6 @@ jobs:
           flags: unittests
           name: codecov-umbrella
         continue-on-error: true
-
-      - name: Upload architecture report
-        uses: actions/upload-artifact@v3
-        if: always()
-        with:
-          name: arch-report-${{ matrix.node-version }}
-          path: arch-report.json
 
   deploy:
     needs: test
@@ -72,11 +61,8 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Run architecture checks
+      - name: Run folder structure validation
         run: npm run arch:check
-
-      - name: Generate architecture report
-        run: npm run arch:report
 
       - name: Create documentation site
         run: |
@@ -262,15 +248,15 @@ jobs:
                       <section>
                           <h2>✅ Build Status</h2>
                           <div>
-                              <span class="status-badge status-success">Architecture Tests: PASSING</span>
+                              <span class="status-badge status-success">Folder Structure: VALID</span>
                               <span class="status-badge status-success">Unit Tests: PASSING</span>
                               <span class="status-badge status-info">Last Updated: <script>document.write(new Date().toLocaleString())</script></span>
                           </div>
                       </section>
                       
                       <section>
-                          <h2>🏗️ Architecture Overview</h2>
-                          <p>A four-layer architecture enforced by ArchUnit with a centralized DI container:</p>
+                          <h2>🏗️ Required Folder Structure</h2>
+                          <p>This project enforces the following required layer folders:</p>
                           <div class="architecture-diagram">
                               <pre>┌─────────────────────────────────────────────────────────────┐
 │                         Module                              │
@@ -300,77 +286,70 @@ jobs:
                       </section>
                       
                       <section>
-                          <h2>📋 Architecture Rules (8 total)</h2>
+                          <h2>📋 Validation Rules (5 total)</h2>
                           <div class="rules-grid">
                               <div class="rule-card">
-                                  <h4>Rule 1: Contracts Self-Contained</h4>
-                                  <p>Contracts layer imports nothing from other layers—no circular dependencies, no leakage.</p>
+                                  <h4>Folder 1: src/contracts</h4>
+                                  <p>Contracts layer - contains interface definitions and contracts.</p>
                               </div>
                               <div class="rule-card">
-                                  <h4>Rule 2: Domain Isolation</h4>
-                                  <p>Domain layer only depends on contracts; no data, presentation, or react-native imports.</p>
+                                  <h4>Folder 2: src/domain</h4>
+                                  <p>Domain layer - contains use cases and repository interfaces.</p>
                               </div>
                               <div class="rule-card">
-                                  <h4>Rule 3: Data Layer Scope</h4>
-                                  <p>Data layer only depends on domain + contracts; no presentation or react-native imports.</p>
+                                  <h4>Folder 3: src/data</h4>
+                                  <p>Data layer - contains repository implementations and data sources.</p>
                               </div>
                               <div class="rule-card">
-                                  <h4>Rule 4: Presentation Dependencies</h4>
-                                  <p>Presentation layer only depends on domain interfaces + contracts, not concrete implementations.</p>
+                                  <h4>Folder 4: src/presentation</h4>
+                                  <p>Presentation layer - contains ViewModels and UI screens.</p>
                               </div>
                               <div class="rule-card">
-                                  <h4>Rule 5: DI as Composition Root</h4>
-                                  <p>Only the DI container may import concrete repository and datasource implementations.</p>
-                              </div>
-                              <div class="rule-card">
-                                  <h4>Rule 6: Naming Conventions</h4>
-                                  <p>Enforced prefixes/suffixes: <code>I*Contract</code>, <code>*UseCase</code>, <code>*Impl</code>, <code>*ViewModel</code>, <code>*Screen</code>.</p>
-                              </div>
-                              <div class="rule-card">
-                                  <h4>Rule 7: No Circular Dependencies</h4>
-                                  <p>All layers are checked for cycles—design dependency graphs must be acyclic.</p>
-                              </div>
-                              <div class="rule-card">
-                                  <h4>Rule 8: React Native Isolation</h4>
-                                  <p>React Native imports restricted to the presentation layer; domain and data remain framework-agnostic.</p>
+                                  <h4>Folder 5: src/di</h4>
+                                  <p>DI Container - contains dependency injection configuration and wiring.</p>
                               </div>
                           </div>
                       </section>
                       
                       <section>
-                          <h2>🚀 Running Tests Locally</h2>
+                          <h2>🚀 Running Validation Locally</h2>
                           <pre style="background: #f3f4f6; padding: 15px; border-radius: 8px; overflow-x: auto; color: #374151;"><code># Install dependencies
 npm install
 
 # Run all tests
 npm test
 
-# Run only architecture rules
-npm run arch:check
-
-# Generate JSON architecture report
-npm run arch:report</code></pre>
+# Run only folder structure validation
+npm run arch:check</code></pre>
                       </section>
                       
                       <section>
-                          <h2>📚 Learn More</h2>
-                          <p>This project uses <strong>ArchUnit</strong> for architecture testing:</p>
+                          <h2>📚 Project Structure</h2>
+                          <p>This React Native analytics module maintains a clean layered architecture with strict folder structure validation:</p>
                           <table>
                               <tr>
-                                  <th>Link</th>
-                                  <th>Description</th>
+                                  <th>Folder</th>
+                                  <th>Purpose</th>
                               </tr>
                               <tr>
-                                  <td><a href="https://www.npmjs.com/package/archunit" target="_blank">archunit on npm</a></td>
-                                  <td>Official npm package (ArchUnitTS)</td>
+                                  <td><code>src/contracts/</code></td>
+                                  <td>Interface definitions and contracts</td>
                               </tr>
                               <tr>
-                                  <td><a href="https://github.com/LukasNiessen/ArchUnitTS" target="_blank">ArchUnitTS GitHub</a></td>
-                                  <td>Source code & documentation</td>
+                                  <td><code>src/domain/</code></td>
+                                  <td>Business logic (use cases, repository interfaces)</td>
                               </tr>
                               <tr>
-                                  <td><a href="https://clean-architecture.dev/" target="_blank">Clean Architecture</a></td>
-                                  <td>Reference architecture principles</td>
+                                  <td><code>src/data/</code></td>
+                                  <td>Data layer (repositories, data sources)</td>
+                              </tr>
+                              <tr>
+                                  <td><code>src/presentation/</code></td>
+                                  <td>UI layer (ViewModels, Screens)</td>
+                              </tr>
+                              <tr>
+                                  <td><code>src/di/</code></td>
+                                  <td>Dependency injection configuration</td>
                               </tr>
                           </table>
                           <a href="https://github.com" class="cta-button">View on GitHub</a>

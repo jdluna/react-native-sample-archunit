@@ -62,7 +62,7 @@ src/
 
 tests/
 └── arch/
-    └── architecture.rules.test.ts  ← all 8 ArchUnit rule suites
+    └── architecture.rules.test.ts  ← folder naming rules (5 rule suites)
 ```
 
 ## Running the architecture checks
@@ -85,14 +85,11 @@ npm run arch:report
 
 | Rule | What it checks |
 |---|---|
-| **Rule 1** | Contracts layer imports nothing from other layers |
-| **Rule 2** | Domain only depends on contracts; no data/presentation imports |
-| **Rule 3** | Data only depends on domain + contracts; no presentation imports |
-| **Rule 4** | Presentation only depends on domain interfaces + contracts |
-| **Rule 5** | Only the DI container may import concrete repository/datasource impls |
-| **Rule 6** | Naming conventions: `I*Contract`, `*UseCase`, `*Impl`, `*ViewModel`, `*Screen` |
-| **Rule 7** | No circular dependencies within any layer |
-| **Rule 8** | `react-native` imports are restricted to the presentation layer |
+| **Rule 1** | Domain layer folder structure: UseCases in `src/domain/usecases`, Repositories in `src/domain/repositories` |
+| **Rule 2** | Data layer folder structure: RepositoryImpl in `src/data/repositories`, DataSources in `src/data/datasources` |
+| **Rule 3** | Presentation layer folder structure: ViewModels in `src/presentation/viewmodels`, Screens in `src/presentation/screen` |
+| **Rule 4** | Contracts layer naming: Contract interfaces must start with `I` prefix |
+| **Rule 5** | DI folder structure: Files in `src/di` must follow DI naming conventions (DIContainer, Factory, Provider, etc.) |
 
 ## Extending the module
 
@@ -102,7 +99,7 @@ When adding a new feature (e.g., `UserSegmentation`):
 2. **Domain** — add `IUserSegmentationRepository.ts` + `GetUserSegmentsUseCase.ts`
 3. **Data** — add `UserSegmentationRepositoryImpl.ts` + data source
 4. **Presentation** — add `UserSegmentationViewModel.ts` + `UserSegmentationScreen.tsx`
-5. **DI** — wire the new bindings in `AnalyticsDIContainer.ts`
+5. **DI** — wire the new bindings in `AnalyticsDIContainer.ts` (add factory methods, update provider)
 
 The ArchUnit tests will **fail automatically** if you accidentally import a
 concrete class from the wrong layer, saving you from discovering the violation
