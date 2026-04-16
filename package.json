@@ -5,7 +5,8 @@
   "scripts": {
     "test": "jest",
     "arch:check": "jest --testPathPattern='test/arch' --verbose",
-    "arch:report": "jest --testPathPattern='test/arch' --verbose --json --outputFile=arch-report.json"
+    "arch:report": "jest --testPathPattern='test/arch' --verbose --json --outputFile=arch-report.json",
+    "arch:html-report": "node scripts/generate-arch-report.js"
   },
   "dependencies": {
     "react": "18.2.0",

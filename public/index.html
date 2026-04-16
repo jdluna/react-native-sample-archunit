@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Architecture Validation Report</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+        
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px 20px;
+            text-align: center;
+        }
+        
+        header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        header p {
+            font-size: 1.1em;
+            opacity: 0.95;
+        }
+        
+        main {
+            padding: 40px 20px;
+        }
+        
+        section {
+            margin-bottom: 40px;
+        }
+        
+        section h2 {
+            font-size: 1.8em;
+            color: #667eea;
+            margin-bottom: 20px;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 10px;
+        }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-weight: bold;
+            margin: 10px 10px 10px 0;
+            background-color: #ef4444;
+            color: white;
+        }
+        
+        .test-summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .test-card {
+            background: #f3f4f6;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            border-left: 4px solid;
+        }
+        
+        .test-card.passed {
+            border-left-color: #10b981;
+        }
+        
+        .test-card.failed {
+            border-left-color: #ef4444;
+        }
+        
+        .test-card .number {
+            font-size: 2em;
+            font-weight: bold;
+            color: #667eea;
+        }
+        
+        .test-card .label {
+            color: #6b7280;
+            font-size: 0.9em;
+            margin-top: 5px;
+        }
+        
+        .test-output {
+            background: #1f2937;
+            color: #10b981;
+            padding: 20px;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            line-height: 1.5;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        
+        table th {
+            background: #f3f4f6;
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+            color: #374151;
+        }
+        
+        table td {
+            padding: 12px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        
+        table tr:hover {
+            background: #f9fafb;
+        }
+        
+        .folder-table code {
+            background: #f3f4f6;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+        }
+        
+        footer {
+            background: #f3f4f6;
+            padding: 20px;
+            text-align: center;
+            color: #666;
+            border-top: 1px solid #e5e7eb;
+        }
+        
+        .cta-button {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 12px 30px;
+            background: #667eea;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: 600;
+            transition: background 0.3s ease;
+        }
+        
+        .cta-button:hover {
+            background: #764ba2;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📊 Architecture Validation Report</h1>
+            <p>React Native Analytics Module - Folder Structure Validation</p>
+        </header>
+        
+        <main>
+            <section>
+                <h2>✅ Validation Status</h2>
+                <div>
+                    <span class="status-badge">Folder Structure: FAILED</span>
+                    <span class="status-badge" style="background: #3b82f6;">Last Updated: <script>document.write(new Date().toLocaleString())</script></span>
+                </div>
+            </section>
+            
+            <section>
+                <h2>📈 Test Results</h2>
+                <div class="test-summary">
+                    <div class="test-card passed">
+                        <div class="number">4</div>
+                        <div class="label">Passed</div>
+                    </div>
+                    <div class="test-card failed">
+                        <div class="number">1</div>
+                        <div class="label">Failed</div>
+                    </div>
+                    <div class="test-card passed">
+                        <div class="number">5</div>
+                        <div class="label">Total</div>
+                    </div>
+                </div>
+            </section>
+            
+            <section>
+                <h2>🏗️ Required Layer Folders</h2>
+                <p>This project enforces the following folder structure:</p>
+                <table class="folder-table">
+                    <thead>
+                        <tr>
+                            <th>Layer</th>
+                            <th>Folder</th>
+                            <th>Purpose</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>1</td>
+                            <td><code>src/contracts/</code></td>
+                            <td>Interface definitions and contracts</td>
+                        </tr>
+                        <tr>
+                            <td>2</td>
+                            <td><code>src/presentation/</code></td>
+                            <td>UI layer (ViewModels, Screens)</td>
+                        </tr>
+                        <tr>
+                            <td>3</td>
+                            <td><code>src/domain/</code></td>
+                            <td>Business logic and use cases</td>
+                        </tr>
+                        <tr>
+                            <td>4</td>
+                            <td><code>src/data/</code></td>
+                            <td>Data repositories and sources</td>
+                        </tr>
+                        <tr>
+                            <td>5</td>
+                            <td><code>src/di/</code></td>
+                            <td>Dependency injection configuration</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+            
+            <section>
+                <h2>🔍 Test Output</h2>
+                <div class="test-output">npm warn Unknown env config &quot;devdir&quot;. This will stop working in the next major version of npm.
+
+&gt; analytics-module@1.0.0 arch:check
+&gt; jest --testPathPattern=&#039;test/arch&#039; --verbose
+
+FAIL test/arch/architecture.rules.test.ts
+  Folder Structure Validation
+    ✓ src/contracts folder must exist (1 ms)
+    ✓ src/domain folder must exist
+    ✓ src/data folder must exist
+    ✓ src/presentation folder must exist
+    ✕ src/di folder must exist (1 ms)
+
+  ● Folder Structure Validation › src/di folder must exist
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: true
+    Received: false
+
+      37 |   test(&#039;src/di folder must exist&#039;, () =&gt; {
+      38 |     const folderPath = path.join(srcPath, &#039;di&#039;);
+    &gt; 39 |     expect(fs.existsSync(folderPath)).toBe(true);
+         |                                       ^
+      40 |   });
+      41 | });
+      42 |
+
+      at Object.&lt;anonymous&gt; (test/arch/architecture.rules.test.ts:39:39)
+
+Test Suites: 1 failed, 1 total
+Tests:       1 failed, 4 passed, 5 total
+Snapshots:   0 total
+Time:        0.256 s, estimated 1 s
+Ran all test suites matching /test\/arch/i.
+</div>
+            </section>
+            
+            <section>
+                <h2>📚 How to Run Locally</h2>
+                <pre style="background: #f3f4f6; padding: 15px; border-radius: 8px; overflow-x: auto; color: #374151;"><code># Install dependencies
+npm install
+
+# Run all tests
+npm test
+
+# Run only architecture validation
+npm run arch:check</code></pre>
+            </section>
+        </main>
+        
+        <footer>
+            <p>Generated by GitHub Actions CI/CD Pipeline</p>
+            <p style="font-size: 0.9em; margin-top: 10px;">Commit: <code><script>fetch('https://api.github.com/repos/' + location.pathname.split('/').slice(1, 3).join('/') + '/commits?per_page=1')
+                .then(r => r.json())
+                .then(d => document.write(d[0]?.sha?.substring(0, 7) || 'N/A'))
+                .catch(() => {})</script></code></p>
+        </footer>
+    </div>
+</body>
+</html>
